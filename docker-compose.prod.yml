@@ -1,0 +1,25 @@
+version: '3'
+services:
+    myfuture:
+        build:
+            context: ./docker/8.0-prod
+            dockerfile: Dockerfile
+        volumes:
+            - '.:/var/www/html'
+        links:
+            - pgsql
+        depends_on:
+            - pgsql
+    pgsql:
+        image: 'postgres:13'
+        environment:
+            PGPASSWORD: '${DB_PASSWORD}'
+            POSTGRES_DB: '${DB_DATABASE}'
+            POSTGRES_USER: '${DB_USERNAME}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD}'
+        volumes:
+            - './database:/var/lib/postgresql/data'
+        healthcheck:
+            test: ["CMD", "pg_isready", "-q", "-d", "${DB_DATABASE}", "-U", "${DB_USERNAME}"]
+            retries: 3
+            timeout: 5s
